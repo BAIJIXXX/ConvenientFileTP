@@ -1,0 +1,28 @@
+# build / runtime output
+bin/
+obj/
+.dotnet/
+.tmp/
+# NOTE: app/ConvenientFileTP.dll is intentionally tracked so "Download ZIP"
+# from GitHub contains a runnable payload. Only debug symbols/config stay out.
+app/*.pdb
+app/*.json
+
+# local test data
+.scratch/
+downloads/
+
+# artifacts: keep only the screenshots referenced by README.md
+artifacts/*
+!artifacts/ui-final-devices.png
+!artifacts/ui-final-widget-bar.png
+!artifacts/ui-final-widget-send.png
+!artifacts/ui-final-widget-receive.png
+!artifacts/ui-final-widget-unviewed.png
+!artifacts/ui-final-animation.png
+!artifacts/ui-main-settings.png
+!artifacts/ui-main-transfers.png
+
+# user-specific
+*.user
+.vs/

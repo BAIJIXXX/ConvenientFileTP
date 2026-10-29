@@ -1,0 +1,145 @@
+<Window x:Class="ConvenientFileTP.UI.FloatingWidget"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ConvenientFileTP 悬浮窗"
+        Width="120"
+        Height="120"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        ShowActivated="False"
+        Focusable="False"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        FontFamily="{StaticResource AppFont}">
+
+    <!-- The window is transparent and exactly as large as the current visual (ball or bar),
+         so the topmost window never blocks clicks outside the widget itself. -->
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
+          AllowDrop="True"
+          MouseLeftButtonDown="RootGrid_MouseLeftButtonDown"
+          MouseMove="RootGrid_MouseMove"
+          MouseLeftButtonUp="RootGrid_MouseLeftButtonUp"
+          MouseEnter="RootGrid_MouseEnter"
+          MouseLeave="RootGrid_MouseLeave"
+          ContextMenuOpening="RootGrid_ContextMenuOpening"
+          DragEnter="RootGrid_DragEnter"
+          DragOver="RootGrid_DragOver"
+          DragLeave="RootGrid_DragLeave"
+          Drop="RootGrid_Drop">
+
+        <Grid.ContextMenu>
+            <ContextMenu x:Name="WidgetMenu">
+                <MenuItem Header="打开下载目录" Click="MenuOpenDownload_Click" />
+                <MenuItem Header="显示主窗口" Click="MenuShowMain_Click" />
+                <MenuItem Header="隐藏浮窗" Click="MenuHide_Click" />
+                <Separator Style="{StaticResource SeparatorMenu}" />
+                <MenuItem Header="退出程序" Click="MenuExit_Click" />
+            </ContextMenu>
+        </Grid.ContextMenu>
+
+        <!-- ===================== Expanded round ball ===================== -->
+        <Grid x:Name="BallPanel" RenderTransformOrigin="0.5,0.5" Background="Transparent">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <!-- Morph scale is driven by the ball/bar transition animation -->
+                    <ScaleTransform x:Name="BallMorphScale" ScaleX="1" ScaleY="1" />
+                    <!-- Hover / drop-highlight scale -->
+                    <ScaleTransform x:Name="BallScale" ScaleX="1" ScaleY="1" />
+                </TransformGroup>
+            </Grid.RenderTransform>
+
+            <!-- Main circle, coloured by transfer state (purple / red / green / yellow) -->
+            <Ellipse x:Name="Ball" Fill="{StaticResource Accent}" Stroke="#59FFFFFF" StrokeThickness="1.5">
+                <Ellipse.Effect>
+                    <DropShadowEffect x:Name="BallShadow" BlurRadius="20" ShadowDepth="2"
+                                      Opacity="0.55" Color="#000000" />
+                </Ellipse.Effect>
+            </Ellipse>
+
+            <!-- Soft highlight for a glassy look -->
+            <Ellipse IsHitTestVisible="False">
+                <Ellipse.Fill>
+                    <RadialGradientBrush GradientOrigin="0.28,0.22" Center="0.34,0.3"
+                                         RadiusX="0.78" RadiusY="0.78">
+                        <GradientStop Color="#3DFFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <!-- Real-time progress ring (hosted by a Canvas so geometry coordinates are absolute) -->
+            <Canvas x:Name="RingCanvas" Width="96" Height="96"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    IsHitTestVisible="False" ClipToBounds="False">
+                <Path x:Name="ProgressRing"
+                      Stroke="#E6FFFFFF"
+                      StrokeThickness="3.5"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round"
+                      Stretch="None"
+                      IsHitTestVisible="False"
+                      Visibility="Collapsed" />
+            </Canvas>
+
+            <StackPanel x:Name="CenterStack" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        IsHitTestVisible="False">
+                <TextBlock x:Name="IconText" Text="⇅" FontSize="26" Foreground="White"
+                           HorizontalAlignment="Center">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="5" ShadowDepth="1" Direction="270"
+                                          Opacity="0.9" Color="#000000" />
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock x:Name="PercentText" FontSize="16" FontWeight="Bold" Foreground="White"
+                           HorizontalAlignment="Center" Visibility="Collapsed">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="5" ShadowDepth="1" Direction="270"
+                                          Opacity="0.9" Color="#000000" />
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock x:Name="HintText" FontSize="9" Foreground="#F2FFFFFF"
+                           HorizontalAlignment="Center" Visibility="Collapsed" Margin="0,1,0,0">
+                    <TextBlock.Effect>
+                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270"
+                                          Opacity="0.9" Color="#000000" />
+                    </TextBlock.Effect>
+                </TextBlock>
+            </StackPanel>
+
+            <!-- Target device name in small type -->
+            <!-- Target device name in small type, on a translucent badge so it stays
+                 readable on light state colours (yellow / green / red) -->
+            <Border x:Name="NameBadge" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                    Background="#59000000" CornerRadius="5" Padding="4,0,4,0"
+                    Margin="6,0,6,7" IsHitTestVisible="False">
+                <TextBlock x:Name="NameText" Text="浮窗" FontSize="10" Foreground="#F2FFFFFF"
+                           TextTrimming="CharacterEllipsis" TextAlignment="Center"
+                           MaxWidth="84" />
+            </Border>
+        </Grid>
+
+        <!-- ===================== Collapsed edge bar ===================== -->
+        <Border x:Name="BarPanel"
+                Visibility="Collapsed"
+                BorderThickness="1"
+                CornerRadius="5"
+                BorderBrush="{StaticResource Accent}"
+                Background="#E614111F">
+            <Grid Margin="2">
+                <!-- Progress fill grows along the bar (state colour) -->
+                <Border x:Name="BarFill" Background="{StaticResource Accent}" CornerRadius="3"
+                        Visibility="Collapsed" />
+                <!-- Idle centre pill (purple = ready) -->
+                <Border x:Name="BarIdlePill" Width="3" Height="44" CornerRadius="2"
+                        Background="{StaticResource Accent}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
