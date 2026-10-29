@@ -29,7 +29,9 @@ namespace ConvenientFileTP.UI
         // ---- geometry (DIP) -------------------------------------------------------------
         private const double BallSizeDip = 96.0;
         private const double BarThicknessDip = 10.0;
-        private const double BarLengthDip = 140.0;
+        // The collapsed bar is exactly as long as the round ball is wide; the morph then
+        // reads as "the ball flattens into a pill", not "a longer pill appears".
+        private const double BarLengthDip = BallSizeDip;
         private const double ShadowPadDip = 12.0;
         private const double DockThresholdDip = 24.0;
         private const double DragStartThresholdDip = 4.0;
@@ -75,10 +77,12 @@ namespace ConvenientFileTP.UI
         private bool _envDockImmediate;
         private bool _dropHighlight;
         private bool _animActive;
+        private int _animSeq;
         private bool _animToBall;
         private Rect _animFrom;
         private Rect _animTo;
         private double _animFromBarOpacity;
+        private double _animFromBallScale = 1.0;
         private Stopwatch _animWatch;
         private bool _animHooked;
         private double _animLastElapsedMs;
@@ -308,15 +312,38 @@ namespace ConvenientFileTP.UI
             _barThickness = Math.Max(6, Math.Round(BarThicknessDip * scale));
             _barLength = Math.Max(72, Math.Round(BarLengthDip * scale));
 
-            BallPanel.Margin = new Thickness(_pad);
+            // The ball keeps its exact round size and is scaled (never clipped) during the
+            // morph; the animated window is always at least as large as the scaled ball.
+            BallPanel.Width = _ballSize;
+            BallPanel.Height = _ballSize;
+            BallPanel.Margin = new Thickness(0);
+            BarPanel.Width = _barThickness;
+            BarPanel.Height = _barLength;
+            BarPanel.HorizontalAlignment = HorizontalAlignment.Center;
+            BarPanel.VerticalAlignment = VerticalAlignment.Center;
+
+            var borderBrush = new SolidColorBrush(Color.FromRgb(0x14, 0x11, 0x1F));
+            borderBrush.Freeze();
+            Ball.Stroke = borderBrush;
+            Ball.StrokeThickness = Math.Max(2.0, Math.Round(3.0 * scale));
+
+            IconText.FontSize = Math.Max(22.0, Math.Round(34.0 * scale));
+            NameText.FontSize = Math.Max(10.0, Math.Round(12.0 * scale));
+
             RingCanvas.Width = _ballSize;
             RingCanvas.Height = _ballSize;
             ProgressRing.StrokeThickness = Math.Max(2.5, Math.Round(_ballSize * 0.038, 1));
-            NameText.MaxWidth = Math.Max(40, _ballSize - 12);
+            NameText.MaxWidth = Math.Max(48, _ballSize - 8);
             BallShadow.BlurRadius = Math.Round(20 * Math.Max(0.7, scale * 0.9));
 
             // QA hook: stretch the transition so individual frames can be inspected.
             _animDurationMs = ReadIntEnv("CFTP_WIDGET_ANIM_MS", AnimDurationMs, 80, 3000);
+        }
+
+        /// <summary>Scale of the round ball when it is fully collapsed into the bar cross-section.</summary>
+        private double BarStartBallScale()
+        {
+            return Math.Max(0.06, _barThickness / Math.Max(1.0, _ballSize));
         }
 
         private void FloatingWidget_Loaded(object sender, RoutedEventArgs e)
@@ -413,7 +440,7 @@ namespace ConvenientFileTP.UI
             Log.Info("浮窗位置恢复: " + WidgetScreen.EdgeName(_edge) + " " + _ratio.ToString("0.###"));
         }
 
-        private void SetWindowRect(Rect rect)
+        private void SetWindowRect(Rect rect, [System.Runtime.CompilerServices.CallerMemberName] string source = "")
         {
             if (double.IsNaN(rect.Left) || double.IsNaN(rect.Top) ||
                 double.IsNaN(rect.Width) || double.IsNaN(rect.Height)) return;
@@ -422,7 +449,7 @@ namespace ConvenientFileTP.UI
             Top = rect.Top;
             Width = Math.Max(1, rect.Width);
             Height = Math.Max(1, rect.Height);
-            Trace("rect " + Left.ToString("0.0") + "," + Top.ToString("0.0") + " " +
+            Trace("rect[" + source + "] " + Left.ToString("0.0") + "," + Top.ToString("0.0") + " " +
                   Width.ToString("0.0") + "x" + Height.ToString("0.0"));
         }
 
@@ -519,16 +546,25 @@ namespace ConvenientFileTP.UI
             if (WidgetScreen.IsVertical(_edge))
             {
                 BarIdlePill.Width = Math.Max(2, Math.Round(3 * _scale));
-                BarIdlePill.Height = Math.Max(16, Math.Round(44 * _scale));
+                BarIdlePill.Height = Math.Max(16, Math.Round(_barLength - 6 * _scale));
             }
             else
             {
-                BarIdlePill.Width = Math.Max(16, Math.Round(44 * _scale));
+                BarIdlePill.Width = Math.Max(16, Math.Round(_barLength - 6 * _scale));
                 BarIdlePill.Height = Math.Max(2, Math.Round(3 * _scale));
             }
 
             ApplyProgressToVisuals();
             UpdateNameText();
+
+            // Safety net: whenever the ball is the settled state, its content must be fully
+            // visible. A previously interrupted morph must never leave the icon/name faded out.
+            if (!_isBar && !_animActive)
+            {
+                CenterStack.Opacity = 1;
+                NameBadge.Opacity = 1;
+                RingCanvas.Opacity = 1;
+            }
         }
 
         private void ApplyProgressToVisuals()
@@ -717,7 +753,8 @@ namespace ConvenientFileTP.UI
         private void BeginPanelAnimation(Rect from, Rect to, bool toBall)
         {
             bool resuming = _animActive;
-            Trace("begin toBall=" + toBall + " resuming=" + resuming + " barOp=" + BarPanel.Opacity.ToString("0.00") + " ballVis=" + BallPanel.Visibility + " barVis=" + BarPanel.Visibility);
+            int seq = ++_animSeq;
+            Trace("begin seq=" + seq + " toBall=" + toBall + " resuming=" + resuming + " barOp=" + BarPanel.Opacity.ToString("0.00") + " ballVis=" + BallPanel.Visibility + " barVis=" + BarPanel.Visibility);
 
             _animFrom = from;
             _animTo = to;
@@ -726,8 +763,17 @@ namespace ConvenientFileTP.UI
             BallPanel.Visibility = Visibility.Visible;
             BarPanel.Visibility = Visibility.Visible;
             BallPanel.Opacity = 1.0;
-            BallMorphScale.ScaleX = 1;
-            BallMorphScale.ScaleY = 1;
+
+            // The ball itself grows from the bar cross-section instead of letting the
+            // window clip a full-size circle: the window is never narrower than the
+            // scaled ball, so the morph stays perfectly round at every frame.
+            double ballStartScale = BarStartBallScale();
+            double fromBallScale = resuming
+                ? Math.Max(ballStartScale, BallMorphScale.ScaleX)
+                : (toBall ? ballStartScale : 1.0);
+            _animFromBallScale = fromBallScale;
+            BallMorphScale.ScaleX = fromBallScale;
+            BallMorphScale.ScaleY = fromBallScale;
 
             // Ball content (icon / progress / device name) would look smeared while the
             // window is squashed to bar size, so it only fades in once the shape is
@@ -778,6 +824,7 @@ namespace ConvenientFileTP.UI
             }
             _animLastElapsedMs = elapsed;
             _animFrameCount++;
+            if (_trace && (_animFrameCount % 12 == 0)) Trace("frame seq=" + _animSeq + " n=" + _animFrameCount + " t=" + elapsed.ToString("0") + " to=" + _animTo.Width.ToString("0.0") + "x" + _animTo.Height.ToString("0.0") + " active=" + _animActive);
 
             double linear = Math.Max(0.0, Math.Min(1.0, elapsed / Math.Max(1.0, _animDurationMs)));
             double posEase = EaseInOutCubic(linear);
@@ -788,11 +835,21 @@ namespace ConvenientFileTP.UI
                 _animFrom.Width + (_animTo.Width - _animFrom.Width) * posEase,
                 _animFrom.Height + (_animTo.Height - _animFrom.Height) * posEase));
 
+            // Grow / shrink the round ball from the bar cross-section. Its scaled size
+            // always fits inside the animated window, so no frame shows a clipped or
+            // elliptical ball.
+            double ballTargetScale = _animToBall ? 1.0 : BarStartBallScale();
+            double ballScale = _animFromBallScale + (ballTargetScale - _animFromBallScale) * posEase;
+            BallMorphScale.ScaleX = ballScale;
+            BallMorphScale.ScaleY = ballScale;
+
             if (_animToBall)
             {
-                // Expanding: the squashed ball is already visible inside the growing
-                // window; fade the bar shell out during the first fifth of the move.
-                double barFade = SmoothStep(Math.Min(1.0, linear / 0.20));
+                // Expanding: keep the thin bar shell visible while the round ball grows out
+                // of it, then fade the shell once the ball is roughly half size.
+                double startScale = BarStartBallScale();
+                double ballProgress = (ballScale - startScale) / Math.Max(0.001, 1.0 - startScale);
+                double barFade = SmoothStep(Math.Min(1.0, Math.Max(0.0, ballProgress / 0.55)));
                 BarPanel.Opacity = _animFromBarOpacity * (1.0 - barFade);
                 BallPanel.Opacity = 1.0;
             }
@@ -874,9 +931,19 @@ namespace ConvenientFileTP.UI
 
             if (toBall)
             {
-                if (_docked && !IsMouseOver) ScheduleCollapse(CollapseDelayMs);
+                // Don't rely on WPF IsMouseOver here: the pointer often rests on the
+                // transparent margin next to the circle, where IsMouseOver is false and
+                // the ball would collapse out from under the cursor.
+                if (_docked && !IsCursorOverWidget())
+                {
+                    ScheduleCollapse(CollapseDelayMs);
+                }
+                else
+                {
+                    CancelCollapse();
+                }
             }
-            else if (IsMouseOver)
+            else if (IsCursorOverWidget())
             {
                 // The pointer followed the widget while it collapsed; open it again smoothly.
                 Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
@@ -888,6 +955,7 @@ namespace ConvenientFileTP.UI
 
         private void StopAnimation()
         {
+            Trace("stopanim active=" + _animActive);
             _animActive = false;
             if (_animHooked)
             {
@@ -934,7 +1002,7 @@ namespace ConvenientFileTP.UI
             if (_collapseTimer != null) _collapseTimer.Stop();
             if (_pressing && !WidgetNative.IsLeftButtonDown()) EndPress(false);
             if (_animActive || _pressing || _dragging || !_docked || _isBar) return;
-            if (IsMouseOver)
+            if (IsCursorOverWidget())
             {
                 ScheduleCollapse(700);
                 return;
@@ -1161,6 +1229,25 @@ namespace ConvenientFileTP.UI
 
             if (!_docked) return;
 
+            // Symmetric self-heal for the expanded ball. WPF occasionally settles the
+            // window a few pixels smaller than the ball (or leaves the ball scale at a
+            // hidden/transition value), which makes the widget look like a tiny dot.
+            Rect expectedBall = WidgetScreen.BallRect(
+                WidgetScreen.ForVisual(this), _edge, _ratio, _ballWindow);
+            bool ballSizeOff = Math.Abs(Width - expectedBall.Width) > 0.8
+                               || Math.Abs(Height - expectedBall.Height) > 0.8
+                               || Math.Abs(Left - expectedBall.Left) > 0.8
+                               || Math.Abs(Top - expectedBall.Top) > 0.8;
+            if (ballSizeOff || BallPanel.Visibility != Visibility.Visible || BallMorphScale.ScaleX < 0.99)
+            {
+                Trace("self-heal ball: rect=" + Width.ToString("0.0") + "x" + Height.ToString("0.0")
+                      + " scale=" + BallMorphScale.ScaleX.ToString("0.00")
+                      + " ballVis=" + BallPanel.Visibility + " expected="
+                      + expectedBall.Width.ToString("0.0") + "x" + expectedBall.Height.ToString("0.0"));
+                SetWindowRect(expectedBall);
+                ShowBallPanel();
+            }
+
             if (over)
             {
                 CancelCollapse();
@@ -1176,7 +1263,8 @@ namespace ConvenientFileTP.UI
             try
             {
                 if (_hwnd == IntPtr.Zero) return IsMouseOver;
-                return WidgetNative.WindowFromPoint(WidgetNative.GetCursorPoint()) == _hwnd;
+                Point cursor = WidgetNative.GetCursorPoint();
+                return WidgetNative.IsPointInWindow(_hwnd, cursor) || IsMouseOver;
             }
             catch
             {
@@ -1401,10 +1489,9 @@ namespace ConvenientFileTP.UI
             if (_dropHighlight == highlight) return;
             _dropHighlight = highlight;
 
-            Ball.Stroke = highlight
-                ? new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF))
-                : new SolidColorBrush(Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF));
-            Ball.StrokeThickness = highlight ? 3.0 : 1.5;
+            // Keep the dark ring border from the normal state; only the bar outline and the
+            // subtle scale change signal the drop target.
+            Ball.StrokeThickness = Math.Max(2.0, Math.Round(3.0 * _scale));
             BarPanel.BorderThickness = new Thickness(highlight ? 2 : 1);
 
             double scale = highlight ? 1.07 : 1.0;

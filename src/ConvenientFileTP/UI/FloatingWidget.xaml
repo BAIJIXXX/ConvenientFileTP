@@ -43,11 +43,15 @@
             </ContextMenu>
         </Grid.ContextMenu>
 
-        <!-- ===================== Expanded round ball ===================== -->
-        <Grid x:Name="BallPanel" RenderTransformOrigin="0.5,0.5" Background="Transparent">
+        <!-- ===================== Expanded round ball =====================
+             The ball keeps its fixed square size at all times; during the bar/ball
+             transition the (smaller) window clips it into a vertical pill instead of
+             stretching it into an ellipse. -->
+        <Grid x:Name="BallPanel" RenderTransformOrigin="0.5,0.5" Background="Transparent"
+              HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.RenderTransform>
                 <TransformGroup>
-                    <!-- Morph scale is driven by the ball/bar transition animation -->
+                    <!-- Morph scale is kept for compatibility; the morph is done by clipping -->
                     <ScaleTransform x:Name="BallMorphScale" ScaleX="1" ScaleY="1" />
                     <!-- Hover / drop-highlight scale -->
                     <ScaleTransform x:Name="BallScale" ScaleX="1" ScaleY="1" />
@@ -55,7 +59,7 @@
             </Grid.RenderTransform>
 
             <!-- Main circle, coloured by transfer state (purple / red / green / yellow) -->
-            <Ellipse x:Name="Ball" Fill="{StaticResource Accent}" Stroke="#59FFFFFF" StrokeThickness="1.5">
+            <Ellipse x:Name="Ball" Fill="{StaticResource Accent}" Stroke="#FF14111F" StrokeThickness="3">
                 <Ellipse.Effect>
                     <DropShadowEffect x:Name="BallShadow" BlurRadius="20" ShadowDepth="2"
                                       Opacity="0.55" Color="#000000" />
@@ -89,7 +93,7 @@
 
             <StackPanel x:Name="CenterStack" VerticalAlignment="Center" HorizontalAlignment="Center"
                         IsHitTestVisible="False">
-                <TextBlock x:Name="IconText" Text="⇅" FontSize="26" Foreground="White"
+                <TextBlock x:Name="IconText" Text="⇅" FontSize="34" FontWeight="Bold" Foreground="White"
                            HorizontalAlignment="Center">
                     <TextBlock.Effect>
                         <DropShadowEffect BlurRadius="5" ShadowDepth="1" Direction="270"
@@ -116,11 +120,11 @@
             <!-- Target device name in small type, on a translucent badge so it stays
                  readable on light state colours (yellow / green / red) -->
             <Border x:Name="NameBadge" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                    Background="#59000000" CornerRadius="5" Padding="4,0,4,0"
+                    Background="#59000000" CornerRadius="6" Padding="6,1,6,1"
                     Margin="6,0,6,7" IsHitTestVisible="False">
-                <TextBlock x:Name="NameText" Text="浮窗" FontSize="10" Foreground="#F2FFFFFF"
+                <TextBlock x:Name="NameText" Text="浮窗" FontSize="12" FontWeight="Bold" Foreground="#F2FFFFFF"
                            TextTrimming="CharacterEllipsis" TextAlignment="Center"
-                           MaxWidth="84" />
+                           MaxWidth="96" />
             </Border>
         </Grid>
 

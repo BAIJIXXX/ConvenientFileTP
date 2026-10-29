@@ -33,6 +33,15 @@ namespace ConvenientFileTP.UI.Widget
             public int Y;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
         [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
         private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
 
@@ -53,6 +62,9 @@ namespace ConvenientFileTP.UI.Widget
 
         [DllImport("user32.dll")]
         private static extern IntPtr WindowFromPoint(POINT point);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
 
         /// <summary>Marks the window as a tool window (no taskbar entry, no Alt+Tab).</summary>
         public static void ApplyToolWindow(IntPtr handle)
@@ -124,6 +136,29 @@ namespace ConvenientFileTP.UI.Widget
             point.X = (int)screenPoint.X;
             point.Y = (int)screenPoint.Y;
             return WindowFromPoint(point);
+        }
+
+        /// <summary>
+        /// True when the physical cursor position is inside the HWND's screen rectangle.
+        /// WindowFromPoint ignores fully transparent layered pixels (the widget window is
+        /// mostly padding), so the rectangle test is what keeps hover state stable while the
+        /// window morphs between the thin bar and the round ball.
+        /// </summary>
+        public static bool IsPointInWindow(IntPtr handle, Point screenPoint)
+        {
+            try
+            {
+                if (handle == IntPtr.Zero) return false;
+                RECT rect;
+                if (!GetWindowRect(handle, out rect)) return false;
+                int x = (int)screenPoint.X;
+                int y = (int)screenPoint.Y;
+                return x >= rect.Left && x < rect.Right && y >= rect.Top && y < rect.Bottom;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
