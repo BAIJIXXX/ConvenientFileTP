@@ -93,14 +93,14 @@
 
             <StackPanel x:Name="CenterStack" VerticalAlignment="Center" HorizontalAlignment="Center"
                         IsHitTestVisible="False">
-                <TextBlock x:Name="IconText" Text="⇅" FontSize="34" FontWeight="Bold" Foreground="{DynamicResource OnAccent}"
+                <TextBlock x:Name="IconText" Text="⇅" FontSize="34" FontWeight="Bold" Foreground="#FFFFFF"
                            HorizontalAlignment="Center">
                     <TextBlock.Effect>
                         <DropShadowEffect BlurRadius="5" ShadowDepth="1" Direction="270"
                                           Opacity="0.9" Color="#000000" />
                     </TextBlock.Effect>
                 </TextBlock>
-                <TextBlock x:Name="PercentText" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource OnAccent}"
+                <TextBlock x:Name="PercentText" FontSize="16" FontWeight="Bold" Foreground="#FFFFFF"
                            HorizontalAlignment="Center" Visibility="Collapsed">
                     <TextBlock.Effect>
                         <DropShadowEffect BlurRadius="5" ShadowDepth="1" Direction="270"

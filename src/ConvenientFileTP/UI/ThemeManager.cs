@@ -154,14 +154,19 @@ namespace ConvenientFileTP.UI
             Color accentDark = _isDark ? Darken(accent, 0.22) : Darken(accent, 0.14);
             Color accentSoft = _isDark
                 ? Blend(accent, ColorFromHex("#241F36"), 0.28)
-                : Blend(accent, Colors.White, 0.12);
-            Color onAccent = Luminance(accent) > 0.62 ? ColorFromHex("#1F1A2E") : Colors.White;
+                : Blend(accent, Colors.White, 0.86);
+            Color onAccentDark = ColorFromHex("#1F1A2E");
+            Color onAccent = ContrastRatio(accent, Colors.White) >= ContrastRatio(accent, onAccentDark)
+                ? Colors.White
+                : onAccentDark;
+            Color onAccentSoft = _isDark ? Lighten(accent, 0.45) : Darken(accent, 0.35);
 
             SetBrush("Accent", accent);
             SetBrush("AccentLight", accentLight);
             SetBrush("AccentDark", accentDark);
             SetBrush("AccentSoft", accentSoft);
             SetBrush("OnAccent", onAccent);
+            SetBrush("OnAccentSoft", onAccentSoft);
 
             if (_isDark)
             {
@@ -318,6 +323,28 @@ namespace ConvenientFileTP.UI
         private static double Luminance(Color color)
         {
             return (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255.0;
+        }
+
+        private static double ContrastRatio(Color a, Color b)
+        {
+            double la = RelativeLuminance(a);
+            double lb = RelativeLuminance(b);
+            double high = Math.Max(la, lb);
+            double low = Math.Min(la, lb);
+            return (high + 0.05) / (low + 0.05);
+        }
+
+        private static double RelativeLuminance(Color color)
+        {
+            return 0.2126 * LinearChannel(color.R)
+                 + 0.7152 * LinearChannel(color.G)
+                 + 0.0722 * LinearChannel(color.B);
+        }
+
+        private static double LinearChannel(byte channel)
+        {
+            double value = channel / 255.0;
+            return value <= 0.03928 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
         }
     }
 }

@@ -82,11 +82,11 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Width="44" Height="44" CornerRadius="13" Background="{DynamicResource AccentSoft}">
+                    <Border Width="44" Height="44" CornerRadius="13" Background="{DynamicResource Accent}">
                         <TextBlock Text="{Binding Initial}"
                                    FontSize="17"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource AccentLight}"
+                                   Foreground="{DynamicResource OnAccent}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
@@ -369,9 +369,9 @@
                                     CornerRadius="12"
                                     Padding="11">
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentSoft}">
+                                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource Accent}">
                                         <TextBlock x:Name="NavAvatarText" Text="本" FontSize="14" FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource AccentLight}"
+                                                   Foreground="{DynamicResource OnAccent}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
@@ -422,9 +422,9 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Width="46" Height="46" CornerRadius="14" Background="{DynamicResource AccentSoft}">
+                                <Border Width="46" Height="46" CornerRadius="14" Background="{DynamicResource Accent}">
                                     <TextBlock x:Name="SelfAvatarText" Text="本" FontSize="18" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource AccentLight}"
+                                               Foreground="{DynamicResource OnAccent}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
 
@@ -436,7 +436,7 @@
                                         <Border Background="{DynamicResource AccentSoft}" CornerRadius="6"
                                                 Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="本机" Style="{StaticResource TinyText}"
-                                                       Foreground="{DynamicResource AccentLight}" />
+                                                       Foreground="{DynamicResource OnAccentSoft}" />
                                         </Border>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
@@ -536,7 +536,7 @@
                                     <Border Width="56" Height="56" CornerRadius="28"
                                             Background="{DynamicResource AccentSoft}" HorizontalAlignment="Center">
                                         <TextBlock Text="⇅" FontSize="22"
-                                                   Foreground="{DynamicResource AccentLight}"
+                                                   Foreground="{DynamicResource OnAccentSoft}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <TextBlock Text="还没有传输记录"
@@ -764,7 +764,7 @@
                     <Border Width="30" Height="30" CornerRadius="15"
                             Background="{DynamicResource AccentSoft}" VerticalAlignment="Center">
                         <TextBlock x:Name="ToastIcon" Text="✓" FontSize="14"
-                                   Foreground="{DynamicResource AccentLight}"
+                                   Foreground="{DynamicResource OnAccentSoft}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center" MaxWidth="460">

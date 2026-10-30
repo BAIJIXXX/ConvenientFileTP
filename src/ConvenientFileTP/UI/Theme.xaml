@@ -19,6 +19,7 @@
     <SolidColorBrush x:Key="AccentDark" Color="#6D3FE0" />
     <SolidColorBrush x:Key="AccentSoft" Color="#332A55" />
     <SolidColorBrush x:Key="OnAccent" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="OnAccentSoft" Color="#C4B5FD" />
     <SolidColorBrush x:Key="DangerHover" Color="#4A2027" />
     <SolidColorBrush x:Key="DangerPressed" Color="#2E1218" />
     <SolidColorBrush x:Key="WidgetShell" Color="#E614111F" />
@@ -37,7 +38,6 @@
     <!-- ============================ Text ============================ -->
     <Style TargetType="{x:Type TextBlock}">
         <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
     </Style>
