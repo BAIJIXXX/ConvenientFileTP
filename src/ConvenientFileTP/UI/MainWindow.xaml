@@ -14,7 +14,7 @@
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
         FontFamily="{StaticResource AppFont}"
-        Foreground="{StaticResource TextPrimary}"
+        Foreground="{DynamicResource TextPrimary}"
         TextOptions.TextFormattingMode="Ideal">
 
     <Window.Resources>
@@ -22,7 +22,7 @@
         <Style x:Key="NavButton" TargetType="{x:Type Button}">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Padding" Value="12,9" />
             <Setter Property="Margin" Value="0,0,0,4" />
@@ -43,11 +43,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource BgCardHover}" />
-                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource BgCardHover}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Chrome" Property="Background" Value="{StaticResource AccentSoft}" />
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource AccentSoft}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Chrome" Property="Opacity" Value="0.45" />
@@ -59,13 +59,13 @@
         </Style>
 
         <Style x:Key="NavButtonActive" TargetType="{x:Type Button}" BasedOn="{StaticResource NavButton}">
-            <Setter Property="Background" Value="{StaticResource AccentSoft}" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
 
         <Style x:Key="StatusPill" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="{StaticResource BgInput}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderSoft}" />
+            <Setter Property="Background" Value="{DynamicResource BgInput}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSoft}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="9" />
             <Setter Property="Padding" Value="10,5" />
@@ -82,11 +82,11 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Width="44" Height="44" CornerRadius="13" Background="{StaticResource AccentSoft}">
+                    <Border Width="44" Height="44" CornerRadius="13" Background="{DynamicResource AccentSoft}">
                         <TextBlock Text="{Binding Initial}"
                                    FontSize="17"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource AccentLight}"
+                                   Foreground="{DynamicResource AccentLight}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
@@ -97,7 +97,7 @@
                                        Style="{StaticResource SectionTitleText}"
                                        TextTrimming="CharacterEllipsis"
                                        MaxWidth="300" />
-                            <Border Background="{StaticResource BgInput}"
+                            <Border Background="{DynamicResource BgInput}"
                                     CornerRadius="6"
                                     Padding="6,1"
                                     Margin="8,0,0,0"
@@ -111,12 +111,12 @@
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <Ellipse x:Name="OnlineDot"
                                      Width="7" Height="7"
-                                     Fill="{StaticResource Success}"
+                                     Fill="{DynamicResource Success}"
                                      VerticalAlignment="Center" />
                             <TextBlock x:Name="OnlineText"
                                        Text="{Binding StatusText}"
                                        Style="{StaticResource TinyText}"
-                                       Foreground="{StaticResource Success}"
+                                       Foreground="{DynamicResource Success}"
                                        Margin="6,0,0,0" />
                             <TextBlock Text="{Binding LastSeenText}"
                                        Style="{StaticResource TinyText}"
@@ -135,11 +135,11 @@
             </Border>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsOnline}" Value="False">
-                    <Setter TargetName="OnlineDot" Property="Fill" Value="{StaticResource TextMuted}" />
-                    <Setter TargetName="OnlineText" Property="Foreground" Value="{StaticResource TextMuted}" />
+                    <Setter TargetName="OnlineDot" Property="Fill" Value="{DynamicResource TextMuted}" />
+                    <Setter TargetName="OnlineText" Property="Foreground" Value="{DynamicResource TextMuted}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSelf}" Value="True">
-                    <Setter TargetName="OnlineText" Property="Foreground" Value="{StaticResource AccentLight}" />
+                    <Setter TargetName="OnlineText" Property="Foreground" Value="{DynamicResource AccentLight}" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -155,11 +155,11 @@
                     </Grid.ColumnDefinitions>
 
                     <Border x:Name="DirBadge" Width="40" Height="40" CornerRadius="12"
-                            Background="{StaticResource BgInput}" VerticalAlignment="Center">
+                            Background="{DynamicResource BgInput}" VerticalAlignment="Center">
                         <TextBlock x:Name="DirGlyph"
                                    Text="⇅"
                                    FontSize="16"
-                                   Foreground="{StaticResource TextSecondary}"
+                                   Foreground="{DynamicResource TextSecondary}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
@@ -186,7 +186,7 @@
                                    Text="{Binding StatusText}"
                                    Style="{StaticResource SectionTitleText}"
                                    FontSize="13"
-                                   Foreground="{StaticResource AccentLight}"
+                                   Foreground="{DynamicResource AccentLight}"
                                    HorizontalAlignment="Right" />
                         <TextBlock Text="{Binding PercentText}"
                                    Style="{StaticResource TinyText}"
@@ -202,29 +202,29 @@
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsSend}" Value="True">
                     <Setter TargetName="DirGlyph" Property="Text" Value="↑" />
-                    <Setter TargetName="DirGlyph" Property="Foreground" Value="{StaticResource Warning}" />
-                    <Setter TargetName="DirBadge" Property="Background" Value="{StaticResource WarningSoft}" />
+                    <Setter TargetName="DirGlyph" Property="Foreground" Value="{DynamicResource Warning}" />
+                    <Setter TargetName="DirBadge" Property="Background" Value="{DynamicResource WarningSoft}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSend}" Value="False">
                     <Setter TargetName="DirGlyph" Property="Text" Value="↓" />
-                    <Setter TargetName="DirGlyph" Property="Foreground" Value="{StaticResource Success}" />
-                    <Setter TargetName="DirBadge" Property="Background" Value="{StaticResource SuccessSoft}" />
+                    <Setter TargetName="DirGlyph" Property="Foreground" Value="{DynamicResource Success}" />
+                    <Setter TargetName="DirBadge" Property="Background" Value="{DynamicResource SuccessSoft}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding StatusKind}" Value="success">
-                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{StaticResource Success}" />
+                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{DynamicResource Success}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding StatusKind}" Value="fail">
-                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{StaticResource Danger}" />
+                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{DynamicResource Danger}" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding StatusKind}" Value="muted">
-                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{StaticResource TextMuted}" />
+                    <Setter TargetName="StatusLabel" Property="Foreground" Value="{DynamicResource TextMuted}" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
 
-    <Border Background="{StaticResource BgDeep}"
-            BorderBrush="{StaticResource BorderSoft}"
+    <Border Background="{DynamicResource BgDeep}"
+            BorderBrush="{DynamicResource BorderSoft}"
             BorderThickness="1"
             CornerRadius="16"
             Margin="12">
@@ -243,7 +243,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
-                    <Border Width="24" Height="24" CornerRadius="8" Background="{StaticResource Accent}">
+                    <Border Width="24" Height="24" CornerRadius="8" Background="{DynamicResource Accent}">
                         <TextBlock Text="⇅" FontSize="13" Foreground="White"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -256,10 +256,10 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
                     <Border Style="{StaticResource StatusPill}">
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="{StaticResource Success}" VerticalAlignment="Center" />
+                            <Ellipse Width="6" Height="6" Fill="{DynamicResource Success}" VerticalAlignment="Center" />
                             <TextBlock x:Name="HeaderSelfName" Text="本机"
                                        Style="{StaticResource TinyText}"
-                                       Foreground="{StaticResource TextSecondary}"
+                                       Foreground="{DynamicResource TextSecondary}"
                                        Margin="6,0,0,0"
                                        MaxWidth="150"
                                        TextTrimming="CharacterEllipsis" />
@@ -270,16 +270,16 @@
                             <TextBlock Text="网络" Style="{StaticResource TinyText}" />
                             <TextBlock x:Name="HeaderModeText" Text="局域网"
                                        Style="{StaticResource TinyText}"
-                                       Foreground="{StaticResource TextPrimary}"
+                                       Foreground="{DynamicResource TextPrimary}"
                                        Margin="5,0,0,0" />
                         </StackPanel>
                     </Border>
                     <Border Style="{StaticResource StatusPill}" Margin="8,0,0,0">
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="6" Height="6" Fill="{StaticResource AccentLight}" VerticalAlignment="Center" />
+                            <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentLight}" VerticalAlignment="Center" />
                             <TextBlock x:Name="HeaderOnlineText" Text="0 台设备在线"
                                        Style="{StaticResource TinyText}"
-                                       Foreground="{StaticResource TextPrimary}"
+                                       Foreground="{DynamicResource TextPrimary}"
                                        Margin="6,0,0,0" />
                         </StackPanel>
                     </Border>
@@ -301,7 +301,7 @@
                 </StackPanel>
 
                 <Border Grid.ColumnSpan="3" VerticalAlignment="Bottom" Height="1"
-                        Background="{StaticResource BorderSoft}" Margin="14,0,14,0" />
+                        Background="{DynamicResource BorderSoft}" Margin="14,0,14,0" />
             </Grid>
 
             <!-- ======================= Body ======================= -->
@@ -313,8 +313,8 @@
 
                 <!-- Left navigation -->
                 <Border Grid.Column="0"
-                        Background="{StaticResource BgPanel}"
-                        BorderBrush="{StaticResource BorderSoft}"
+                        Background="{DynamicResource BgPanel}"
+                        BorderBrush="{DynamicResource BorderSoft}"
                         BorderThickness="1"
                         CornerRadius="14"
                         Padding="12">
@@ -363,15 +363,15 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="2">
-                            <Border Background="{StaticResource BgCard}"
-                                    BorderBrush="{StaticResource BorderSoft}"
+                            <Border Background="{DynamicResource BgCard}"
+                                    BorderBrush="{DynamicResource BorderSoft}"
                                     BorderThickness="1"
                                     CornerRadius="12"
                                     Padding="11">
                                 <StackPanel Orientation="Horizontal">
-                                    <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource AccentSoft}">
+                                    <Border Width="34" Height="34" CornerRadius="10" Background="{DynamicResource AccentSoft}">
                                         <TextBlock x:Name="NavAvatarText" Text="本" FontSize="14" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource AccentLight}"
+                                                   Foreground="{DynamicResource AccentLight}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
@@ -422,9 +422,9 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Width="46" Height="46" CornerRadius="14" Background="{StaticResource AccentSoft}">
+                                <Border Width="46" Height="46" CornerRadius="14" Background="{DynamicResource AccentSoft}">
                                     <TextBlock x:Name="SelfAvatarText" Text="本" FontSize="18" FontWeight="SemiBold"
-                                               Foreground="{StaticResource AccentLight}"
+                                               Foreground="{DynamicResource AccentLight}"
                                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
 
@@ -433,10 +433,10 @@
                                         <TextBlock x:Name="SelfNameText" Text="本机"
                                                    Style="{StaticResource SectionTitleText}" FontSize="15"
                                                    TextTrimming="CharacterEllipsis" MaxWidth="300" />
-                                        <Border Background="{StaticResource AccentSoft}" CornerRadius="6"
+                                        <Border Background="{DynamicResource AccentSoft}" CornerRadius="6"
                                                 Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
                                             <TextBlock Text="本机" Style="{StaticResource TinyText}"
-                                                       Foreground="{StaticResource AccentLight}" />
+                                                       Foreground="{DynamicResource AccentLight}" />
                                         </Border>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
@@ -470,17 +470,17 @@
                                      SelectionChanged="PeerList_SelectionChanged" />
 
                             <Border x:Name="PeerEmptyPanel"
-                                    Background="{StaticResource BgCard}"
-                                    BorderBrush="{StaticResource BorderSoft}"
+                                    Background="{DynamicResource BgCard}"
+                                    BorderBrush="{DynamicResource BorderSoft}"
                                     BorderThickness="1"
                                     CornerRadius="14"
                                     Padding="26"
                                     VerticalAlignment="Top">
                                 <StackPanel HorizontalAlignment="Center">
                                     <Grid Width="56" Height="56" HorizontalAlignment="Center">
-                                        <Ellipse Width="56" Height="56" Stroke="{StaticResource AccentSoft}" StrokeThickness="2" />
-                                        <Ellipse Width="32" Height="32" Stroke="{StaticResource Accent}" StrokeThickness="2" Opacity="0.75" />
-                                        <Ellipse Width="10" Height="10" Fill="{StaticResource Accent}" />
+                                        <Ellipse Width="56" Height="56" Stroke="{DynamicResource AccentSoft}" StrokeThickness="2" />
+                                        <Ellipse Width="32" Height="32" Stroke="{DynamicResource Accent}" StrokeThickness="2" Opacity="0.75" />
+                                        <Ellipse Width="10" Height="10" Fill="{DynamicResource Accent}" />
                                     </Grid>
                                     <TextBlock Text="正在搜索同一局域网内的设备…"
                                                Style="{StaticResource SectionTitleText}"
@@ -526,17 +526,17 @@
                                      MouseDoubleClick="TransferList_MouseDoubleClick" />
 
                             <Border x:Name="TransferEmptyPanel"
-                                    Background="{StaticResource BgCard}"
-                                    BorderBrush="{StaticResource BorderSoft}"
+                                    Background="{DynamicResource BgCard}"
+                                    BorderBrush="{DynamicResource BorderSoft}"
                                     BorderThickness="1"
                                     CornerRadius="14"
                                     Padding="26"
                                     VerticalAlignment="Top">
                                 <StackPanel HorizontalAlignment="Center">
                                     <Border Width="56" Height="56" CornerRadius="28"
-                                            Background="{StaticResource AccentSoft}" HorizontalAlignment="Center">
+                                            Background="{DynamicResource AccentSoft}" HorizontalAlignment="Center">
                                         <TextBlock Text="⇅" FontSize="22"
-                                                   Foreground="{StaticResource AccentLight}"
+                                                   Foreground="{DynamicResource AccentLight}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                     <TextBlock Text="还没有传输记录"
@@ -564,7 +564,7 @@
                         <Grid Grid.Row="0" Margin="0,16,0,14">
                             <StackPanel>
                                 <TextBlock Text="设置" Style="{StaticResource AppTitleText}" />
-                                <TextBlock Text="调整本机名称、接收目录与通知行为"
+                                <TextBlock Text="调整本机名称、接收目录、外观与通知行为"
                                            Style="{StaticResource HintText}" Margin="0,4,0,0" />
                             </StackPanel>
                             <Button Content="保存设置" Style="{StaticResource PrimaryButton}"
@@ -582,15 +582,15 @@
                                                    Style="{StaticResource HintText}" Margin="0,4,0,14" />
 
                                         <TextBlock Text="设备名称" Style="{StaticResource BodyText}"
-                                                   Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6" />
+                                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
                                         <TextBox x:Name="DeviceNameBox" Style="{StaticResource InputBox}" MaxLength="40" />
                                         <TextBlock Text="保存后会立即同步到同一网络中的其他设备。"
                                                    Style="{StaticResource TinyText}" Margin="0,6,0,0" />
 
-                                        <Border Height="1" Background="{StaticResource BorderSoft}" Margin="0,16,0,16" />
+                                        <Border Height="1" Background="{DynamicResource BorderSoft}" Margin="0,16,0,16" />
 
                                         <TextBlock Text="下载目录" Style="{StaticResource BodyText}"
-                                                   Foreground="{StaticResource TextSecondary}" Margin="0,0,0,6" />
+                                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -602,6 +602,43 @@
                                         </Grid>
                                         <TextBlock Text="接收到的文件会保存到这个目录。" Style="{StaticResource TinyText}"
                                                    Margin="0,6,0,0" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource CardBorder}" Margin="0,0,0,14">
+                                    <StackPanel>
+                                        <TextBlock Text="外观" Style="{StaticResource SectionTitleText}" />
+                                        <TextBlock Text="选择白天 / 夜晚风格并自定义主题色，修改会立即生效并自动保存。"
+                                                   Style="{StaticResource HintText}" Margin="0,4,0,16" />
+
+                                        <TextBlock Text="显示模式" Style="{StaticResource BodyText}"
+                                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                            <RadioButton x:Name="ThemeDarkRadio" Content="夜晚"
+                                                         Style="{StaticResource ThemeModeRadio}" Tag="dark"
+                                                         Checked="ThemeMode_Checked" />
+                                            <RadioButton x:Name="ThemeLightRadio" Content="白天"
+                                                         Style="{StaticResource ThemeModeRadio}" Tag="light"
+                                                         Checked="ThemeMode_Checked" />
+                                            <RadioButton x:Name="ThemeSystemRadio" Content="跟随系统"
+                                                         Style="{StaticResource ThemeModeRadio}" Tag="system"
+                                                         Checked="ThemeMode_Checked" />
+                                        </StackPanel>
+                                        <TextBlock Text="跟随系统时会读取 Windows 的应用浅色/深色设置，并在系统切换时自动更新。"
+                                                   Style="{StaticResource TinyText}" Margin="0,8,0,0" />
+
+                                        <Border Height="1" Background="{DynamicResource BorderSoft}" Margin="0,16,0,16" />
+
+                                        <TextBlock Text="主题色" Style="{StaticResource BodyText}"
+                                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6" />
+                                        <WrapPanel x:Name="AccentSwatchPanel" Margin="0,4,0,0" />
+                                        <Grid Margin="0,10,0,0">
+                                            <TextBlock x:Name="AccentValueText" Style="{StaticResource TinyText}"
+                                                       VerticalAlignment="Center" />
+                                            <Button Content="自定义…" HorizontalAlignment="Right"
+                                                    Style="{StaticResource GhostButton}" Padding="10,4"
+                                                    Click="CustomAccent_Click" />
+                                        </Grid>
                                     </StackPanel>
                                 </Border>
 
@@ -624,7 +661,7 @@
                                                       Style="{StaticResource SwitchToggle}" VerticalAlignment="Center" />
                                         </Grid>
 
-                                        <Border Height="1" Background="{StaticResource BorderSoft}" Margin="0,0,0,14" />
+                                        <Border Height="1" Background="{DynamicResource BorderSoft}" Margin="0,0,0,14" />
 
                                         <Grid Margin="0,0,0,16">
                                             <Grid.ColumnDefinitions>
@@ -640,7 +677,7 @@
                                                       Style="{StaticResource SwitchToggle}" VerticalAlignment="Center" />
                                         </Grid>
 
-                                        <Border Height="1" Background="{StaticResource BorderSoft}" Margin="0,0,0,14" />
+                                        <Border Height="1" Background="{DynamicResource BorderSoft}" Margin="0,0,0,14" />
 
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -713,8 +750,8 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
                     Margin="0,0,0,30"
-                    Background="{StaticResource BgPanel}"
-                    BorderBrush="{StaticResource Border}"
+                    Background="{DynamicResource BgPanel}"
+                    BorderBrush="{DynamicResource Border}"
                     BorderThickness="1"
                     CornerRadius="12"
                     Padding="16,12"
@@ -725,9 +762,9 @@
                 </Border.Effect>
                 <StackPanel Orientation="Horizontal">
                     <Border Width="30" Height="30" CornerRadius="15"
-                            Background="{StaticResource AccentSoft}" VerticalAlignment="Center">
+                            Background="{DynamicResource AccentSoft}" VerticalAlignment="Center">
                         <TextBlock x:Name="ToastIcon" Text="✓" FontSize="14"
-                                   Foreground="{StaticResource AccentLight}"
+                                   Foreground="{DynamicResource AccentLight}"
                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center" MaxWidth="460">

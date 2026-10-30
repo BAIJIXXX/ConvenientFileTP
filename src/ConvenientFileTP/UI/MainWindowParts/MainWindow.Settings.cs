@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using ConvenientFileTP.Core;
 
 namespace ConvenientFileTP.UI
@@ -8,6 +9,13 @@ namespace ConvenientFileTP.UI
     /// <summary>主窗口：设置页面。</summary>
     public partial class MainWindow
     {
+        private static readonly string[] AccentPresets =
+        {
+            "#8B5CF6", "#6366F1", "#3B82F6", "#06B6D4", "#10B981", "#F59E0B", "#EF4444", "#EC4899"
+        };
+
+        private bool _appearanceSyncing;
+
         private void LoadSettingsIntoUi()
         {
             try
@@ -21,11 +29,119 @@ namespace ConvenientFileTP.UI
                 if (NotifyToggle != null) NotifyToggle.IsChecked = config.ShowNotifications;
                 if (CloseToTrayToggle != null) CloseToTrayToggle.IsChecked = config.CloseToTray;
 
+                RefreshAppearanceUi();
                 UpdateSettingsInfo();
             }
             catch (Exception ex)
             {
                 Log.Error("读取设置失败", ex);
+            }
+        }
+
+        /// <summary>Re-selects the appearance controls after the theme was changed anywhere.</summary>
+        public void RefreshAppearanceUi()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(RefreshAppearanceUi));
+                return;
+            }
+
+            _appearanceSyncing = true;
+            try
+            {
+                var mode = ThemeManager.Mode;
+                if (ThemeDarkRadio != null) ThemeDarkRadio.IsChecked = mode == ThemeMode.Dark;
+                if (ThemeLightRadio != null) ThemeLightRadio.IsChecked = mode == ThemeMode.Light;
+                if (ThemeSystemRadio != null) ThemeSystemRadio.IsChecked = mode == ThemeMode.System;
+
+                RebuildAccentSwatches();
+
+                if (AccentValueText != null)
+                {
+                    AccentValueText.Text = ThemeManager.ToHex(ThemeManager.AccentColor) + " · " +
+                                           (ThemeManager.IsDark ? "夜晚配色" : "白天配色");
+                }
+            }
+            finally
+            {
+                _appearanceSyncing = false;
+            }
+        }
+
+        private void RebuildAccentSwatches()
+        {
+            if (AccentSwatchPanel == null) return;
+            AccentSwatchPanel.Children.Clear();
+
+            string current = ThemeManager.ToHex(ThemeManager.AccentColor);
+            var style = TryFindResource("AccentSwatchButton") as Style;
+
+            foreach (string hex in AccentPresets)
+            {
+                Color color;
+                if (!ThemeManager.TryParseColor(hex, out color)) continue;
+
+                var swatch = new System.Windows.Controls.Button
+                {
+                    Background = new SolidColorBrush(color),
+                    Tag = hex,
+                    ToolTip = hex,
+                    BorderThickness = string.Equals(hex, current, StringComparison.OrdinalIgnoreCase)
+                        ? new Thickness(2)
+                        : new Thickness(1),
+                    BorderBrush = string.Equals(hex, current, StringComparison.OrdinalIgnoreCase)
+                        ? (Brush)(TryFindResource("TextPrimary") ?? Brushes.White)
+                        : (Brush)(TryFindResource("Border") ?? Brushes.Gray)
+                };
+                System.Windows.Automation.AutomationProperties.SetName(swatch, hex);
+                if (style != null) swatch.Style = style;
+                swatch.Click += AccentSwatch_Click;
+                AccentSwatchPanel.Children.Add(swatch);
+            }
+        }
+
+        private void ThemeMode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_appearanceSyncing) return;
+            var radio = sender as System.Windows.Controls.RadioButton;
+            string tag = radio != null ? radio.Tag as string : null;
+            AppServices.SetThemeMode(ThemeManager.ParseMode(tag));
+        }
+
+        private void AccentSwatch_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as System.Windows.Controls.Button;
+            string hex = button != null ? button.Tag as string : null;
+            Color color;
+            if (hex != null && ThemeManager.TryParseColor(hex, out color))
+            {
+                AppServices.SetAccentColor(color);
+            }
+        }
+
+        private void CustomAccent_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using (var dialog = new System.Windows.Forms.ColorDialog())
+                {
+                    dialog.FullOpen = true;
+                    dialog.AnyColor = true;
+                    var current = ThemeManager.AccentColor;
+                    dialog.Color = System.Drawing.Color.FromArgb(current.R, current.G, current.B);
+
+                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        var picked = dialog.Color;
+                        AppServices.SetAccentColor(Color.FromRgb(picked.R, picked.G, picked.B));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("选择自定义主题色失败", ex);
+                ShowToast("无法选择颜色", ex.Message);
             }
         }
 

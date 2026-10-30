@@ -160,6 +160,35 @@ namespace ConvenientFileTP.UI
             base.OnClosing(e);
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            try { ThemeManager.ThemeChanged -= OnThemeChanged; } catch { }
+            base.OnClosed(e);
+        }
+
+        /// <summary>Re-applies accent/state colours after the user changes the app theme.</summary>
+        public void RefreshTheme()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(RefreshTheme));
+                return;
+            }
+            try
+            {
+                ApplyStateVisuals();
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Error("刷新悬浮窗主题失败", ex);
+            }
+        }
+
+        private void OnThemeChanged(object sender, EventArgs e)
+        {
+            RefreshTheme();
+        }
+
         // =================================================================================
         // Public contract surface
         // =================================================================================
@@ -356,6 +385,7 @@ namespace ConvenientFileTP.UI
             StartDemoIfRequested();
             StartIdleWatcher();
             StartTraceTimer();
+            ThemeManager.ThemeChanged += OnThemeChanged;
 
             if (_envDockImmediate)
             {

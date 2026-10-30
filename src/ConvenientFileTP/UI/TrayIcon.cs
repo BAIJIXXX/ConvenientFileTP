@@ -15,13 +15,17 @@ namespace ConvenientFileTP.UI
         private readonly ContextMenuStrip _menu;
         private bool _disposed;
 
+        private ThemeColors _colors;
+
         public TrayIcon()
         {
+            _colors = ThemeColors.FromResources();
+
             var menu = new ContextMenuStrip
             {
-                Renderer = new DarkMenuRenderer(),
-                BackColor = Color.FromArgb(27, 23, 41),
-                ForeColor = Color.FromArgb(243, 240, 255),
+                Renderer = new ThemedMenuRenderer(_colors),
+                BackColor = _colors.Panel,
+                ForeColor = _colors.Text,
                 Font = new Font("Microsoft YaHei UI", 9f),
                 ShowImageMargin = false,
                 Padding = new Padding(4)
@@ -69,14 +73,32 @@ namespace ConvenientFileTP.UI
             catch { }
         }
 
-        private static ToolStripMenuItem CreateItem(string text)
+        private ToolStripMenuItem CreateItem(string text)
         {
             return new ToolStripMenuItem(text)
             {
-                ForeColor = Color.FromArgb(243, 240, 255),
+                ForeColor = _colors.Text,
                 BackColor = Color.Transparent,
                 Padding = new Padding(8, 5, 8, 5)
             };
+        }
+
+        /// <summary>Rebuilds menu colours after the app theme changed.</summary>
+        public void RefreshTheme()
+        {
+            if (_disposed) return;
+            try
+            {
+                _colors = ThemeColors.FromResources();
+                _menu.Renderer = new ThemedMenuRenderer(_colors);
+                _menu.BackColor = _colors.Panel;
+                _menu.ForeColor = _colors.Text;
+                foreach (ToolStripItem item in _menu.Items)
+                {
+                    if (item is ToolStripMenuItem) item.ForeColor = _colors.Text;
+                }
+            }
+            catch { }
         }
 
         private static Icon CreateTrayIcon()
@@ -156,38 +178,79 @@ namespace ConvenientFileTP.UI
             try { if (_menu != null) _menu.Dispose(); } catch { }
         }
 
-        private sealed class DarkMenuRenderer : ToolStripProfessionalRenderer
+        internal sealed class ThemeColors
         {
-            public DarkMenuRenderer() : base(new DarkColorTable())
+            public Color Panel;
+            public Color Text;
+            public Color Muted;
+            public Color Hover;
+            public Color Border;
+
+            public static ThemeColors FromResources()
             {
+                return new ThemeColors
+                {
+                    Panel = Read("BgPanel", 27, 23, 41),
+                    Text = Read("TextPrimary", 243, 240, 255),
+                    Muted = Read("TextMuted", 124, 114, 149),
+                    Hover = Read("BgCardHover", 45, 39, 70),
+                    Border = Read("Border", 58, 50, 86)
+                };
+            }
+
+            private static Color Read(string key, int r, int g, int b)
+            {
+                try
+                {
+                    var app = System.Windows.Application.Current;
+                    if (app != null)
+                    {
+                        var brush = app.TryFindResource(key) as System.Windows.Media.SolidColorBrush;
+                        if (brush != null) return Color.FromArgb(brush.Color.A, brush.Color.R, brush.Color.G, brush.Color.B);
+                    }
+                }
+                catch { }
+                return Color.FromArgb(255, (byte)r, (byte)g, (byte)b);
+            }
+        }
+
+        private sealed class ThemedMenuRenderer : ToolStripProfessionalRenderer
+        {
+            private readonly ThemeColors _colors;
+
+            public ThemedMenuRenderer(ThemeColors colors) : base(new ThemedColorTable(colors))
+            {
+                _colors = colors;
                 RoundedEdges = true;
             }
 
             protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
             {
-                if (!e.Item.Enabled) e.TextColor = Color.FromArgb(120, 112, 149);
-                else e.TextColor = Color.FromArgb(243, 240, 255);
+                e.TextColor = e.Item.Enabled ? _colors.Text : _colors.Muted;
                 base.OnRenderItemText(e);
             }
         }
 
-        private sealed class DarkColorTable : ProfessionalColorTable
+        private sealed class ThemedColorTable : ProfessionalColorTable
         {
-            private static readonly Color Panel = Color.FromArgb(27, 23, 41);
-            private static readonly Color Hover = Color.FromArgb(45, 39, 70);
-            private static readonly Color BorderColor = Color.FromArgb(58, 50, 86);
+            private readonly ThemeColors _colors;
 
-            public override Color ToolStripDropDownBackground { get { return Panel; } }
-            public override Color ImageMarginGradientBegin { get { return Panel; } }
-            public override Color ImageMarginGradientMiddle { get { return Panel; } }
-            public override Color ImageMarginGradientEnd { get { return Panel; } }
-            public override Color MenuBorder { get { return BorderColor; } }
-            public override Color MenuItemBorder { get { return Hover; } }
-            public override Color MenuItemSelected { get { return Hover; } }
-            public override Color MenuItemSelectedGradientBegin { get { return Hover; } }
-            public override Color MenuItemSelectedGradientEnd { get { return Hover; } }
-            public override Color SeparatorDark { get { return BorderColor; } }
-            public override Color SeparatorLight { get { return BorderColor; } }
+            public ThemedColorTable(ThemeColors colors)
+            {
+                _colors = colors;
+            }
+
+            public override Color ToolStripDropDownBackground { get { return _colors.Panel; } }
+            public override Color ImageMarginGradientBegin { get { return _colors.Panel; } }
+            public override Color ImageMarginGradientMiddle { get { return _colors.Panel; } }
+            public override Color ImageMarginGradientEnd { get { return _colors.Panel; } }
+            public override Color MenuBorder { get { return _colors.Border; } }
+            public override Color MenuItemBorder { get { return _colors.Hover; } }
+            public override Color MenuItemSelected { get { return _colors.Hover; } }
+            public override Color MenuItemSelectedGradientBegin { get { return _colors.Hover; } }
+            public override Color MenuItemSelectedGradientEnd { get { return _colors.Hover; } }
+            public override Color SeparatorDark { get { return _colors.Border; } }
+            public override Color SeparatorLight { get { return _colors.Border; } }
         }
     }
 }

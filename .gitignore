@@ -22,6 +22,10 @@ artifacts/*
 !artifacts/ui-final-animation.png
 !artifacts/ui-main-settings.png
 !artifacts/ui-main-transfers.png
+!artifacts/ui-theme-dark.png
+!artifacts/ui-theme-light.png
+!artifacts/ui-theme-accent.png
+!artifacts/ui-theme-widget.png
 
 # user-specific
 *.user

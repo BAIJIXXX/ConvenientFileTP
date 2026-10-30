@@ -19,6 +19,8 @@ namespace ConvenientFileTP.Core
         public double WidgetScale { get; set; } = 1.0;
         public string WidgetEdge { get; set; } = "right";
         public double WidgetOffsetRatio { get; set; } = 0.5;
+        public string ThemeMode { get; set; } = "dark";
+        public string AccentColor { get; set; } = "#8B5CF6";
 
         [NonSerialized]
         private string _path;
@@ -74,6 +76,18 @@ namespace ConvenientFileTP.Core
             if (config.WidgetScale < 0.6 || config.WidgetScale > 2.0) config.WidgetScale = 1.0;
             if (string.IsNullOrEmpty(config.WidgetEdge)) config.WidgetEdge = "right";
             if (config.WidgetOffsetRatio < 0 || config.WidgetOffsetRatio > 1) config.WidgetOffsetRatio = 0.5;
+
+            string themeMode = (config.ThemeMode ?? "").Trim().ToLowerInvariant();
+            if (themeMode != "system" && themeMode != "light" && themeMode != "dark") themeMode = "dark";
+            config.ThemeMode = themeMode;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(config.AccentColor ?? "", "^#[0-9A-Fa-f]{6}$"))
+            {
+                config.AccentColor = "#8B5CF6";
+            }
+            else
+            {
+                config.AccentColor = config.AccentColor.ToUpperInvariant();
+            }
 
             config.Save();
             return config;

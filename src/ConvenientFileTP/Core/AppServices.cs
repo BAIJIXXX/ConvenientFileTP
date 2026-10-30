@@ -39,6 +39,8 @@ namespace ConvenientFileTP.Core
             Config = AppConfig.Load(AppPaths.ConfigFile, StartupOptions.Current);
             AppPaths.DownloadDirectory = Config.DownloadDirectory;
             AppPaths.EnsureDownloadDirectory(Config.DownloadDirectory);
+            ThemeManager.Initialize(Config);
+            ThemeManager.ThemeChanged += OnThemeChanged;
 
             Identity = new DeviceIdentity(Config.DeviceId, Config.DeviceName);
             Log.Info("启动: " + Identity.Name + " id=" + Identity.Id + " 配置=" + AppPaths.ConfigFile);
@@ -219,6 +221,50 @@ namespace ConvenientFileTP.Core
             if (Config == null || string.IsNullOrWhiteSpace(directory)) return;
             Config.DownloadDirectory = directory.Trim();
             SaveConfig();
+        }
+
+        /// <summary>Applies a new day/night palette mode and persists it.</summary>
+        public static void SetThemeMode(ThemeMode mode)
+        {
+            if (Config == null) return;
+            Config.ThemeMode = ThemeManager.ModeKey(mode);
+            ThemeManager.SetMode(mode);
+            SaveConfig();
+            Log.Info("主题模式已切换为 " + ThemeManager.ModeText);
+        }
+
+        /// <summary>Applies a new accent colour and persists it.</summary>
+        public static void SetAccentColor(System.Windows.Media.Color color)
+        {
+            if (Config == null) return;
+            Config.AccentColor = ThemeManager.ToHex(color);
+            ThemeManager.SetAccent(color);
+            SaveConfig();
+            Log.Info("主题色已切换为 " + Config.AccentColor);
+        }
+
+        public static void ResetTheme()
+        {
+            if (Config == null) return;
+            Config.ThemeMode = "dark";
+            Config.AccentColor = ThemeManager.ToHex(ThemeManager.DefaultAccent);
+            ThemeManager.SetMode(ThemeMode.Dark);
+            ThemeManager.SetAccent(ThemeManager.DefaultAccent);
+            SaveConfig();
+        }
+
+        private static void OnThemeChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (Tray != null) Tray.RefreshTheme();
+                if (Floating != null) Floating.RefreshTheme();
+                if (Main != null) Main.RefreshAppearanceUi();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("刷新主题界面失败", ex);
+            }
         }
 
         public static void Exit()
