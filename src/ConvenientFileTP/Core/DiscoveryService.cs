@@ -377,8 +377,7 @@ namespace ConvenientFileTP.Core
 
         private static string GetVersion()
         {
-            try { return typeof(DiscoveryService).Assembly.GetName().Version.ToString(3); }
-            catch { return "1.0.0"; }
+            return AppInfo.Version;
         }
 
         public void Dispose()

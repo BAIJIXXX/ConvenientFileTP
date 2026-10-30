@@ -423,7 +423,7 @@ namespace ConvenientFileTP.UI
                 }
                 if (InfoVersionText != null)
                 {
-                    InfoVersionText.Text = "ConvenientFileTP " + AppVersion;
+                    InfoVersionText.Text = "ConvenientFileTP " + AppInfo.DisplayVersion;
                 }
             }
             catch (Exception ex)

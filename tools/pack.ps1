@@ -49,7 +49,7 @@ if (Test-Path -LiteralPath $srcRoot) {
         ForEach-Object { Copy-Into $_.FullName $_.FullName.Substring($root.Length + 1) }
 }
 
-$zip = Join-Path $root 'artifacts\ConvenientFileTP-1.0.0.zip'
+$zip = Join-Path $root 'artifacts\ConvenientFileTP-0.1.0-beta.zip'
 if (Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
 # Build the archive entry by entry with FORWARD SLASH separators.
 # .NET Framework's ZipFile.CreateFromDirectory stores Windows backslashes in entry

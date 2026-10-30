@@ -22,7 +22,7 @@ function Show-Error([string]$message) {
 if (-not (Test-Path -LiteralPath $dllPath)) {
     Show-Error ("App payload not found:`r`n" + $dllPath + "`r`n`r`n" +
         "The package is incomplete or was extracted incorrectly.`r`n" +
-        "1) Use the portable zip (artifacts\ConvenientFileTP-1.0.0.zip), not the GitHub source zip.`r`n" +
+        "1) Use the portable zip (artifacts\ConvenientFileTP-0.1.0-beta.zip), not the GitHub source zip.`r`n" +
         "2) Extract it with Explorer or 7-Zip and keep the folder structure (an 'app' folder next to launcher.ps1).`r`n" +
         "3) If a security tool removed the DLL, restore/allow it and extract again.`r`n" +
         "4) Source-only checkout: run tools\build.ps1 first (requires .NET SDK).")

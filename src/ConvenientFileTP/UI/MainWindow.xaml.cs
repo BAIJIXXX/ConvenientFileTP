@@ -302,17 +302,7 @@ namespace ConvenientFileTP.UI
 
         private static string AppVersion
         {
-            get
-            {
-                try
-                {
-                    return typeof(AppServices).Assembly.GetName().Version.ToString(3);
-                }
-                catch
-                {
-                    return "1.0.0";
-                }
-            }
+            get { return AppInfo.Version; }
         }
 
         private void StartStatusTimer()
