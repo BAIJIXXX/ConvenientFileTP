@@ -26,6 +26,7 @@ artifacts/*
 !artifacts/ui-theme-light.png
 !artifacts/ui-theme-accent.png
 !artifacts/ui-theme-widget.png
+!artifacts/ui-theme-picker.png
 
 # user-specific
 *.user

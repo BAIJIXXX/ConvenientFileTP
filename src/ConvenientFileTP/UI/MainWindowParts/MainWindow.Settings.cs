@@ -120,29 +120,274 @@ namespace ConvenientFileTP.UI
             }
         }
 
+        private bool _pickerSyncing;
+        private double _pickerHue = 265;
+        private double _pickerSat = 0.62;
+        private double _pickerVal = 0.96;
+
         private void CustomAccent_Click(object sender, RoutedEventArgs e)
         {
+            OpenAccentPicker();
+        }
+
+        private void OpenAccentPicker()
+        {
+            if (AccentPickerOverlay == null) return;
+            AccentPickerOverlay.Visibility = Visibility.Visible;
+            SyncPickerFromColor(ThemeManager.AccentColor);
+            Dispatcher.BeginInvoke(new Action(() => SyncPickerFromColor(ThemeManager.AccentColor)));
+        }
+
+        private void CloseAccentPicker_Click(object sender, RoutedEventArgs e)
+        {
+            if (AccentPickerOverlay != null) AccentPickerOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void AccentPickerOverlay_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (AccentPickerOverlay != null) AccentPickerOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        private void AccentPickerCard_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void SvArea_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            SvArea.CaptureMouse();
+            UpdateSvFromPointer(e.GetPosition(SvArea));
+            e.Handled = true;
+        }
+
+        private void SvArea_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (SvArea.IsMouseCaptured && e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                UpdateSvFromPointer(e.GetPosition(SvArea));
+            }
+        }
+
+        private void SvArea_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (SvArea.IsMouseCaptured) SvArea.ReleaseMouseCapture();
+            PersistCurrentPickerColor();
+            e.Handled = true;
+        }
+
+        private void SvArea_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            // While dragging, keep updating through mouse capture.
+        }
+
+        private void HueArea_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            HueArea.CaptureMouse();
+            UpdateHueFromPointer(e.GetPosition(HueArea));
+            e.Handled = true;
+        }
+
+        private void HueArea_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (HueArea.IsMouseCaptured && e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                UpdateHueFromPointer(e.GetPosition(HueArea));
+            }
+        }
+
+        private void HueArea_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (HueArea.IsMouseCaptured) HueArea.ReleaseMouseCapture();
+            PersistCurrentPickerColor();
+            e.Handled = true;
+        }
+
+        private void UpdateSvFromPointer(Point point)
+        {
+            double width = SvArea.ActualWidth > 1 ? SvArea.ActualWidth : 236;
+            double height = SvArea.ActualHeight > 1 ? SvArea.ActualHeight : 150;
+            _pickerSat = Clamp01(point.X / width);
+            _pickerVal = Clamp01(1.0 - point.Y / height);
+            ApplyPickerColor(HsvToColor(_pickerHue, _pickerSat, _pickerVal), false, true);
+        }
+
+        private void UpdateHueFromPointer(Point point)
+        {
+            double width = HueArea.ActualWidth > 1 ? HueArea.ActualWidth : 236;
+            _pickerHue = Clamp01(point.X / width) * 360.0;
+            RebuildSaturationGradient();
+            ApplyPickerColor(HsvToColor(_pickerHue, _pickerSat, _pickerVal), false, true);
+        }
+
+        private void ApplyPickerColor(Color color, bool persist, bool syncHexText)
+        {
+            bool previous = _pickerSyncing;
+            _pickerSyncing = true;
             try
             {
-                using (var dialog = new System.Windows.Forms.ColorDialog())
+                if (AccentPreviewSwatch != null) AccentPreviewSwatch.Background = new SolidColorBrush(color);
+                if (AccentPreviewText != null)
                 {
-                    dialog.FullOpen = true;
-                    dialog.AnyColor = true;
-                    var current = ThemeManager.AccentColor;
-                    dialog.Color = System.Drawing.Color.FromArgb(current.R, current.G, current.B);
-
-                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        var picked = dialog.Color;
-                        AppServices.SetAccentColor(Color.FromRgb(picked.R, picked.G, picked.B));
-                    }
+                    AccentPreviewText.Text = "当前色号 " + ThemeManager.ToHex(color);
                 }
+                if (syncHexText && AccentHexInput != null)
+                {
+                    AccentHexInput.Text = ThemeManager.ToHex(color);
+                }
+                AppServices.SetAccentColor(color, persist);
+                UpdatePickerPositions(color);
             }
-            catch (Exception ex)
+            finally
             {
-                Log.Error("选择自定义主题色失败", ex);
-                ShowToast("无法选择颜色", ex.Message);
+                _pickerSyncing = previous;
             }
+        }
+
+        private void PersistCurrentPickerColor()
+        {
+            AppServices.SetAccentColor(HsvToColor(_pickerHue, _pickerSat, _pickerVal), true);
+        }
+
+        private void SyncPickerFromColor(Color color)
+        {
+            double h, s, v;
+            ColorToHsv(color, out h, out s, out v);
+            _pickerHue = h;
+            _pickerSat = s;
+            _pickerVal = v;
+            RebuildSaturationGradient();
+            ApplyPickerColor(color, false, true);
+            UpdatePickerPositions(color);
+        }
+
+        private void RebuildSaturationGradient()
+        {
+            if (SvSaturationRect == null) return;
+            var gradient = new LinearGradientBrush(Colors.White, HsvToColor(_pickerHue, 1, 1), 0);
+            SvSaturationRect.Fill = gradient;
+        }
+
+        private void UpdatePickerPositions(Color color)
+        {
+            if (SvThumb != null && SvArea != null)
+            {
+                double width = SvArea.ActualWidth > 1 ? SvArea.ActualWidth : 236;
+                double height = SvArea.ActualHeight > 1 ? SvArea.ActualHeight : 150;
+                System.Windows.Controls.Canvas.SetLeft(SvThumb, _pickerSat * width - 7);
+                System.Windows.Controls.Canvas.SetTop(SvThumb, (1.0 - _pickerVal) * height - 7);
+                SvThumb.Fill = new SolidColorBrush(color);
+            }
+            if (HueThumb != null && HueArea != null)
+            {
+                double width = HueArea.ActualWidth > 1 ? HueArea.ActualWidth : 236;
+                System.Windows.Controls.Canvas.SetLeft(HueThumb, Clamp01(_pickerHue / 360.0) * (width - 4));
+            }
+        }
+
+        private void AccentHexInput_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (_pickerSyncing) return;
+            Color color;
+            if (!TryParseHexText(AccentHexInput != null ? AccentHexInput.Text : null, out color)) return;
+            double h, s, v;
+            ColorToHsv(color, out h, out s, out v);
+            _pickerHue = h;
+            _pickerSat = s;
+            _pickerVal = v;
+            RebuildSaturationGradient();
+            ApplyPickerColor(color, false, false);
+        }
+
+        private void AccentHexInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                ApplyHexAccent_Click(sender, e);
+                e.Handled = true;
+            }
+        }
+
+        private void ApplyHexAccent_Click(object sender, RoutedEventArgs e)
+        {
+            Color color;
+            if (AccentHexInput == null || !TryParseHexText(AccentHexInput.Text, out color))
+            {
+                ShowToast("色号格式不正确", "请输入 #RRGGBB，例如 #8B5CF6。");
+                return;
+            }
+
+            SyncPickerFromColor(color);
+            AppServices.SetAccentColor(color, true);
+        }
+
+        private void ResetAccentPicker_Click(object sender, RoutedEventArgs e)
+        {
+            Color color = ThemeManager.DefaultAccent;
+            SyncPickerFromColor(color);
+            AppServices.SetAccentColor(color, true);
+        }
+
+        private static bool TryParseHexText(string text, out Color color)
+        {
+            color = Colors.Transparent;
+            string value = (text ?? "").Trim();
+            if (value.StartsWith("#", StringComparison.Ordinal)) value = value.Substring(1);
+            if (value.Length != 6) return false;
+            int r, g, b;
+            if (!int.TryParse(value.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out r)) return false;
+            if (!int.TryParse(value.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out g)) return false;
+            if (!int.TryParse(value.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out b)) return false;
+            color = Color.FromRgb((byte)r, (byte)g, (byte)b);
+            return true;
+        }
+
+        private static double Clamp01(double value)
+        {
+            if (value < 0) return 0;
+            if (value > 1) return 1;
+            return value;
+        }
+
+        private static Color HsvToColor(double hue, double saturation, double value)
+        {
+            double h = ((hue % 360.0) + 360.0) % 360.0;
+            double s = Clamp01(saturation);
+            double v = Clamp01(value);
+            double c = v * s;
+            double x = c * (1 - Math.Abs((h / 60.0) % 2 - 1));
+            double m = v - c;
+            double r = 0, g = 0, b = 0;
+            if (h < 60) { r = c; g = x; }
+            else if (h < 120) { r = x; g = c; }
+            else if (h < 180) { g = c; b = x; }
+            else if (h < 240) { g = x; b = c; }
+            else if (h < 300) { r = x; b = c; }
+            else { r = c; b = x; }
+            return Color.FromRgb((byte)Math.Round((r + m) * 255), (byte)Math.Round((g + m) * 255), (byte)Math.Round((b + m) * 255));
+        }
+
+        private static void ColorToHsv(Color color, out double hue, out double saturation, out double value)
+        {
+            double r = color.R / 255.0;
+            double g = color.G / 255.0;
+            double b = color.B / 255.0;
+            double max = Math.Max(r, Math.Max(g, b));
+            double min = Math.Min(r, Math.Min(g, b));
+            double delta = max - min;
+
+            value = max;
+            saturation = max <= 0 ? 0 : delta / max;
+
+            if (delta <= 0)
+            {
+                hue = 0;
+                return;
+            }
+
+            if (max == r) hue = 60 * (((g - b) / delta) % 6);
+            else if (max == g) hue = 60 * (((b - r) / delta) + 2);
+            else hue = 60 * (((r - g) / delta) + 4);
+            if (hue < 0) hue += 360;
         }
 
         private void UpdateSettingsInfo()

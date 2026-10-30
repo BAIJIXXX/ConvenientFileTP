@@ -236,9 +236,16 @@ namespace ConvenientFileTP.Core
         /// <summary>Applies a new accent colour and persists it.</summary>
         public static void SetAccentColor(System.Windows.Media.Color color)
         {
+            SetAccentColor(color, true);
+        }
+
+        /// <summary>Applies a new accent colour; persist=false avoids disk writes while dragging a colour picker.</summary>
+        public static void SetAccentColor(System.Windows.Media.Color color, bool persist)
+        {
             if (Config == null) return;
             Config.AccentColor = ThemeManager.ToHex(color);
             ThemeManager.SetAccent(color);
+            if (!persist) return;
             SaveConfig();
             Log.Info("主题色已切换为 " + Config.AccentColor);
         }
